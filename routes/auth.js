@@ -7,8 +7,15 @@ const authentication = require("../middleware/authentication");
 
 const testUser = require("../middleware/test-user");
 
-router.post("/register", register);
-router.post("/login", login);
+const rateLimiter = require("express-rate-limit");
+const appLimiter = rateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { msg: "too many request, please try after 15min" },
+});
+
+router.post("/register", appLimiter, register);
+router.post("/login", appLimiter, login);
 router.patch("/updateUser", authentication, testUser, updateUser);
 
 module.exports = router;
